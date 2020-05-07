@@ -58,7 +58,7 @@ class RedsLoader(Loader):
         ###My Method
         X = self._uncrypt(self._train_path[0],couples)
         y = self._uncrypt(self._train_path[1],couples)
-        return extract_patches_2d(X, (32,32)), extract_patches_2d(y, (32,32))
+        return self._patches_creator(X, (30,32)), self._patches_creator(y, (30,32))
         
     
     def _getVal(self):
@@ -70,7 +70,7 @@ class RedsLoader(Loader):
         ###My method
         X = self._uncrypt(self._train_path[0],couples)
         y = self._uncrypt(self._train_path[1],couples)
-        return extract_patches_2d(X, (32,32)), extract_patches_2d(y, (32,32))
+        return self._patches_creator(X, (30,32)), self._patches_creator(y, (30,32))
         
     def _getTest(self, batch_size = None):
         if batch_size:
@@ -84,7 +84,7 @@ class RedsLoader(Loader):
         ###My method
         X = self._uncrypt(self._test_path[0],couples)
         y = self._uncrypt(self._test_path[1],couples)
-        return extract_patches_2d(X, (32,32)), extract_patches_2d(y, (32,32))
+        return self._patches_creator(X, (30,32)), self._patches_creator(y, (30,32))
 
     def get_Train_Test_Validation(self):
         return (self._getTrain, self._getVal, self._getTest)
@@ -122,7 +122,13 @@ class RedsLoader(Loader):
                 y.append(ymodel)
         return np.asarray(X), np.asarray(y)
 
-        
+    def _patches_creator(self, images, shape):
+        out = []
+        for i in range(images.shape[0]):
+            for row in range(0, images[i].shape[0], shape[0]):
+                for column in range(0, images[i].shape[1], shape[1]):
+                    out.append(images[i, row:row+shape[0], column:column+shape[1], :])
+        return np.asarray(out).reshape((len(out), shape[0], shape[1], 3))
 
 
     

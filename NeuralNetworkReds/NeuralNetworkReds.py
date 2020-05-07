@@ -27,8 +27,8 @@ class NeuralNetworkReds(NeuralNetwork):
         self._model.compile(loss='categorical_crossentropy', optimizer='adam',metrics=["accuracy"])
         """
         self._model = Sequential()
-        image = Input(shape = (32,32,3))
-        feat_extraction = Conv2D(filters = 64, kernel_size = (5,5), padding = 'same', activation = 'relu', input_shape = (32,32,3), use_bias = True) (image)
+        image = Input(shape = (30,32,3))
+        feat_extraction = Conv2D(filters = 64, kernel_size = (5,5), padding = 'same', activation = 'relu', input_shape = (30,32,3), use_bias = True) (image)
         feat_enhanced = Conv2D(filters = 64, kernel_size = (3,3), padding = 'same', activation = 'relu', use_bias = True) (feat_extraction)
         merge = concatenate([feat_extraction,feat_enhanced])
         second_order = Conv2D(filters = 64, kernel_size = (1,1), padding = 'valid' ,activation = 'relu', use_bias = True) (merge)
