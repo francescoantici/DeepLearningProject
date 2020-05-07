@@ -1,6 +1,7 @@
 import numpy as np 
 from Models.Kernels import kernel_generator
 from Models.Loader import Loader
+from Models.Patcher import patcher
 from PIL import Image
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.image import extract_patches_2d
@@ -14,8 +15,8 @@ class RedsLoader(Loader):
         #Useful paramters and paths
         
         self._abs_path = path 
-        self._train_batch_size = 128
-        self._val_batch_size = 32
+        self._train_batch_size = 64
+        self._val_batch_size = 16
         self._train_path = ["train_blur", "train_sharp"]
         self._test_path = ["val_blur", "val_sharp"]
         self._train_files = 240
@@ -58,7 +59,7 @@ class RedsLoader(Loader):
         ###My Method
         X = self._uncrypt(self._train_path[0],couples)
         y = self._uncrypt(self._train_path[1],couples)
-        return self._patches_creator(X, (30,32)), self._patches_creator(y, (30,32))
+        return patcher(X, (30,32)), patcher(y, (30,32))
         
     
     def _getVal(self):
@@ -70,7 +71,7 @@ class RedsLoader(Loader):
         ###My method
         X = self._uncrypt(self._train_path[0],couples)
         y = self._uncrypt(self._train_path[1],couples)
-        return self._patches_creator(X, (30,32)), self._patches_creator(y, (30,32))
+        return patcher(X, (30,32)), patcher(y, (30,32))
         
     def _getTest(self, batch_size = None):
         if batch_size:
@@ -84,7 +85,7 @@ class RedsLoader(Loader):
         ###My method
         X = self._uncrypt(self._test_path[0],couples)
         y = self._uncrypt(self._test_path[1],couples)
-        return self._patches_creator(X, (30,32)), self._patches_creator(y, (30,32))
+        return patcher(X, (30,32)), patcher(y, (30,32))
 
     def get_Train_Test_Validation(self):
         return (self._getTrain, self._getVal, self._getTest)
@@ -122,13 +123,7 @@ class RedsLoader(Loader):
                 y.append(ymodel)
         return np.asarray(X), np.asarray(y)
 
-    def _patches_creator(self, images, shape):
-        out = []
-        for i in range(images.shape[0]):
-            for row in range(0, images[i].shape[0], shape[0]):
-                for column in range(0, images[i].shape[1], shape[1]):
-                    out.append(images[i, row:row+shape[0], column:column+shape[1], :])
-        return np.asarray(out).reshape((len(out), shape[0], shape[1], 3))
+    
 
 
     

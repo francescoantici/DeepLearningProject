@@ -1,5 +1,6 @@
 import numpy as np
 from Models.NeuralNetwork import NeuralNetwork
+from Models.Patcher import reconstruct
 from NeuralNetworkReds.RedsLoader import RedsLoader
 from keras.models import Sequential, Model
 from keras.layers import Conv2D,Input, concatenate, MaxPooling2D, Dense, Activation, Flatten, Dropout, Reshape
@@ -59,8 +60,8 @@ class NeuralNetworkReds(NeuralNetwork):
     
     def display_sample(self, arguments):
         trainge, valgen, testgen = arguments
-        X, y = testgen(16)
-        data = [X.reshape((16,720,1280,3)), y.reshape((16,720,1280,3)), self.predict(X).astype('uint8').reshape((16,720,1280,3))]
+        X, y = testgen(1)
+        data = [reconstruct(X, (720,1280)) , reconstruct(y, (720,1280)) , reconstruct(self.predict(X).astype('uint8'),(720,1280)) ]
         i = randint(0,data[0].shape[0]-1)
         for batch in data:
             img = Image.fromarray(batch[i], 'RGB')
