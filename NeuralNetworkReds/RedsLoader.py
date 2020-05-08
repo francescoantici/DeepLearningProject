@@ -49,7 +49,7 @@ class RedsLoader(Loader):
         #return np.asarray(out)
         return pic
 
-    def _getTrain(self, batch_size):
+    def _getTrain(self, batch_size = None):
         if batch_size:
             couples = self._genCouples(self._train_folders, batch_size)
         else:
@@ -66,7 +66,7 @@ class RedsLoader(Loader):
        
         
     
-    def _getVal(self, batch_size):
+    def _getVal(self, batch_size = None):
         if batch_size:
             couples = self._genCouples(self._val_folders, batch_size)
         else:
