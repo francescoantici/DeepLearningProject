@@ -31,15 +31,7 @@ class NeuralNetworkReds(NeuralNetwork):
         traingen, valgen, testgen = arguments
         es = EarlyStopping(monitor = 'val_accuracy', mode = max, restore_best_weights = True, verbose = 1)#, patience = 40)
         #es = EarlyStopping(monitor = 'val_losl', mode = min, restore_best_weights = True, verbose = 1, patience = 40)
-        """
-        for epoch in range(epochs):
-            sys.stdout.flush()
-            print("\r"+str(epoch+1)+"/"+str(epochs), sep = ' ', end = '', flush = True)
-            Xtrain, ytrain = traingen()
-            Xval, yval = valgen()
-            self._model.fit(Xtrain, ytrain, validation_data = (Xval, yval), callbacks = [es], batch_size = 64)
-        """
-        self._model.fit_generator(traingen(), steps_per_epoch = 64, epochs = epochs, callbacks = [es], validation_data = valgen(), validation_steps = 16)
+        self._model.fit_generator(traingen(), steps_per_epoch = 21000, epochs = epochs, callbacks = [es], validation_data = valgen(), validation_steps = 3000)
 
             
             

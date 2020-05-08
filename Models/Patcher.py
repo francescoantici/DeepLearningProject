@@ -23,7 +23,7 @@ def reconstruct(patches, shape, kernel):
         out.append(np.asarray(img))
     #return np.asarray(out)
     return deconvolve(np.asarray(out), kernel)
-
+"""
 kernels = np.load("Models/Kernels.npy", allow_pickle=True)
 pic = np.asarray(Image.open("/Users/francesco/Desktop/RedsDataset/train_sharp/230/00000005.png"))
 blurred = filter2D(pic, -1, kernels[2])
@@ -33,6 +33,6 @@ img = np.polydiv(blurred,kernels[2])
 img2 = Image.fromarray(img, 'RGB')
 img2.show()
 
-
+"""
         
 
