@@ -8,7 +8,6 @@ from keras import backend as k
 from keras.callbacks import EarlyStopping
 from random import randint
 from PIL import Image
-from scipy.signal import deconvolve
 import sys
 
 class NeuralNetworkReds(NeuralNetwork):
@@ -30,8 +29,8 @@ class NeuralNetworkReds(NeuralNetwork):
 
     def fit(self, arguments, epochs = 10):
         traingen, valgen, testgen = arguments
-        #es = EarlyStopping(monitor = 'val_accuracy', mode = max, restore_best_weights = True, verbose = 1, patience = 40)
-        es = EarlyStopping(monitor = 'val_loss', mode = min, restore_best_weights = True, verbose = 1, patience = 40)
+        es = EarlyStopping(monitor = 'val_accuracy', mode = max, restore_best_weights = True, verbose = 1)#, patience = 40)
+        #es = EarlyStopping(monitor = 'val_losl', mode = min, restore_best_weights = True, verbose = 1, patience = 40)
         """
         for epoch in range(epochs):
             sys.stdout.flush()
@@ -40,17 +39,16 @@ class NeuralNetworkReds(NeuralNetwork):
             Xval, yval = valgen()
             self._model.fit(Xtrain, ytrain, validation_data = (Xval, yval), callbacks = [es], batch_size = 64)
         """
-        self._model.fit_generator(traingen(),steps_per_epoch = 1, epochs = epochs, callbacks = [es], validation_data = valgen(), validation_steps = 1)
+        self._model.fit_generator(traingen(), steps_per_epoch = 64, epochs = epochs, callbacks = [es], validation_data = valgen(), validation_steps = 16)
 
             
             
     def evaluate(self, arguments, display = True):
-        trainge, valgen, testgen = arguments
-        Xtest, ytest = testgen(16)
-        return super()._evaluate(Xtest, ytest, display = display)
+        traingen, valgen, testgen = arguments
+        return self._model.evaluate_generator(testgen(), steps = 3000)
     
     def display_sample(self, arguments):
-        trainge, valgen, testgen = arguments
+        traingen, valgen, testgen = arguments
         X, y = testgen(1)
         data = [reconstruct(X, (720,1280)) , reconstruct(y, (720,1280)) , reconstruct(self.predict(X).astype('uint8'),(720,1280)) ]
         i = randint(0,data[0].shape[0]-1)
