@@ -44,7 +44,7 @@ class NeuralNetworkReds(NeuralNetwork):
     def fit(self, arguments, epochs = 10):
         traingen, valgen, testgen = arguments
         #es = EarlyStopping(monitor = 'val_accuracy', mode = max, restore_best_weights = True, verbose = 1)#, patience = 40)
-        es = EarlyStopping(monitor = 'val_loss', mode = min, restore_best_weights = True, verbose = 1)#, patience = 40)
+        es = EarlyStopping(monitor = 'val_loss', mode = min, restore_best_weights = True, verbose = 1, patience = 10)
         self._model.fit_generator(traingen(), steps_per_epoch = 256, epochs = epochs, callbacks = [es], validation_data = valgen(), validation_steps = 32)
 
             
