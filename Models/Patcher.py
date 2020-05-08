@@ -1,12 +1,11 @@
 import numpy as np
 from PIL import Image
 
-def patcher(images, shape):
+def patcher(image, shape):
     out = []
-    for i in range(images.shape[0]):
-        for row in range(0, images[i].shape[0], shape[0]):
-            for column in range(0, images[i].shape[1], shape[1]):
-                out.append(images[i, row:row+shape[0], column:column+shape[1], :])
+    for row in range(0, image.shape[0], shape[0]):
+        for column in range(0, image.shape[1], shape[1]):
+            out.append(image[row:row+shape[0], column:column+shape[1], :])
     return np.asarray(out).reshape((len(out), shape[0], shape[1], 3))
 
 def reconstruct(patches, shape):

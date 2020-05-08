@@ -52,40 +52,32 @@ class RedsLoader(Loader):
 
     def _getTrain(self):
         couples = self._genCouples(self._train_folders, self._train_batch_size)
-        ###Deconvolution method
-        #Xsharp = self._uncrypt(self._train_path[0],couples)
-        #X, y = self._motion_convolution(Xsharp)
-        #return X, y 
-        ###My Method
-        X = self._uncrypt(self._train_path[0],couples)
-        y = self._uncrypt(self._train_path[1],couples)
-        return patcher(X, (30,32)), patcher(y, (30,32))
+        while True:
+            Xsharp = self._uncrypt(self._train_path[0],couples)
+            X, y = self._motion_convolution(Xsharp)
+            #return X, y 
+            yield (X, y)
+       
         
     
     def _getVal(self):
         couples = self._genCouples(self._val_folders, self._val_batch_size)
-        ###Deconvolution Method
-        #Xsharp = self._uncrypt(self._train_path[0], couples)
-        #X, y = self._motion_convolution(Xsharp)
-        #return X, y
-        ###My method
-        X = self._uncrypt(self._train_path[0],couples)
-        y = self._uncrypt(self._train_path[1],couples)
-        return patcher(X, (30,32)), patcher(y, (30,32))
-        
+        while True:
+            Xsharp = self._uncrypt(self._train_path[0], couples)
+            X, y = self._motion_convolution(Xsharp)
+            #return X, y 
+            yield (X, y)
+                
     def _getTest(self, batch_size = None):
         if batch_size:
             couples = self._genCouples(self._test_folders, batch_size)
         else:
             couples = [(folder, image) for folder in self._test_folders for image in range(self._n_images)]
-        ###Deconvolution Method
-        #Xsharp = self._uncrypt(self._test_path[0], couples)
-        #X, y = self._motion_convolution(Xsharp)
-        #return X, y
-        ###My method
-        X = self._uncrypt(self._test_path[0],couples)
-        y = self._uncrypt(self._test_path[1],couples)
-        return patcher(X, (30,32)), patcher(y, (30,32))
+        while True:
+            Xsharp = self._uncrypt(self._test_path[0], couples)
+            X, y = self._motion_convolution(Xsharp)
+            #return X, y 
+            yield (X, y)
 
     def get_Train_Test_Validation(self):
         return (self._getTrain, self._getVal, self._getTest)
@@ -100,11 +92,14 @@ class RedsLoader(Loader):
                 couples.append(tmp)
         return couples
 
-    def _motion_convolution(self, Xsharp):
-        X = []
-        y = []
+    def _motion_convolution(self, Xsharp, dim = (30,32)):
+        n_patches = int((Xsharp.shape[1] * Xsharp.shape[2])/(dim[0] * dim[1]))
+        batch_size = Xsharp.shape[0] * n_patches
+        X = np.zeros((batch_size, dim[0], dim[1], 3))
+        y = np.zeros((batch_size, 73))
         chosen = []
         kernels = kernel_generator()
+        count = 0
         for pic in Xsharp:
             ymodel = np.zeros((73,))
             index = randint(0, len(kernels) - 1)
@@ -116,11 +111,12 @@ class RedsLoader(Loader):
                     continue
 
             chosen.append(index)
-            patches = extract_patches_2d(filter2D(pic, -1, kernels[index]), (30,30))
-            X.append(patches)
+            patches = patcher(filter2D(pic, -1, kernels[index]), dim)
             ymodel[index] = 1
-            for elem in range(patches.shape[0]):
-                y.append(ymodel)
+            for elem in range(n_patches):
+                y[(count * n_patches) + elem] = ymodel
+                X[(count * n_patches) + elem] = patches[elem]
+            count += 1
         return np.asarray(X), np.asarray(y)
 
     

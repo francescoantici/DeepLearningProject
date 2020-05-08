@@ -36,7 +36,7 @@ def Main(model = "1", mode = "load", master = "local"):
   if mode == "load":
     NN.load_weights(weights) 
   elif mode == "train":
-    NN.fit(arguments, epochs = 15)
+    NN.fit(arguments, epochs = 1)
     NN.save(weights)
   else: 
     raise Exception("The specified method is not valid, please insert train or load")
@@ -50,7 +50,7 @@ def Main(model = "1", mode = "load", master = "local"):
   #DISPLAY OF THE RESULTS
 
   #NN.show_different_sigma(Xtest, ytest, [1,2,3])
-  NN.display_sample(arguments)
+  #NN.display_sample(arguments)
   #"""
   #Xtrain, ytrain, Xval, yval = RedsLoader("NeuralNetworkReds/Reds-Dataset").get_train_validation()
   #print(yval.shape)
@@ -67,7 +67,7 @@ CNN = {
     },
     "2" : {
       "NN" : NeuralNetworkReds,
-      "Loader" : RedsLoader,
+      "Loader" : RedsLoader, 
       "Weights" : "NeuralNetworkReds/Weights/RedsWeights.h5",
       "Dataset" : {
         "local" : "/Users/francesco/Desktop/RedsDataset",
