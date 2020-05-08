@@ -51,7 +51,11 @@ class NeuralNetworkReds(NeuralNetwork):
             
     def evaluate(self, arguments, display = True):
         traingen, valgen, testgen = arguments
-        return self._model.evaluate_generator(testgen(), steps = 3000)
+        test_loss_accuracy = self._model.evaluate_generator(testgen(), steps = 32)
+        if display:
+            print("\nThe Loss Function on the Test set has a value of: {0:.1f}.".format(test_loss_accuracy[0]))
+            print("The Accuracy on the Test set is: {0:.1f}%.\n".format(test_loss_accuracy[1]*100))
+        return test_loss_accuracy
     
     def display_sample(self, arguments):
         traingen, valgen, testgen = arguments
