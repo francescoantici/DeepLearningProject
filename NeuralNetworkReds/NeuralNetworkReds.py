@@ -40,7 +40,7 @@ class NeuralNetworkReds(NeuralNetwork):
             Xval, yval = valgen()
             self._model.fit(Xtrain, ytrain, validation_data = (Xval, yval), callbacks = [es], batch_size = 64)
         """
-        self._model.fit_generator(traingen(),steps_per_epoch = 64, epochs = epochs, callbacks = [es], validation_data = valgen(), validation_steps = 16)
+        self._model.fit_generator(traingen(),steps_per_epoch = 1, epochs = epochs, callbacks = [es], validation_data = valgen(), validation_steps = 1)
 
             
             
