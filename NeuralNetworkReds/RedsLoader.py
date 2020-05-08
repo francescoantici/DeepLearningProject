@@ -57,11 +57,15 @@ class RedsLoader(Loader):
         while True:
             index = 0
             for couple in couples:
+                #Mine
+                X = patcher(self._uncrypt(self._train_path[0], couple), (30, 32))
+                y = patcher(self._uncrypt(self._train_path[1], couple), (30, 32))
+                """
                 #print("\r"+"train"+":"+str(index)+"/"+str(len(couples)), sep = ' ', end = '', flush = True)
                 Xsharp = self._uncrypt(self._train_path[0],couple)
                 X, y = self._motion_convolution(Xsharp)
                 index += 1
-                #return X, y 
+                """
                 yield (X, y)
        
         
@@ -74,11 +78,15 @@ class RedsLoader(Loader):
         while True:
             index = 0
             for couple in couples:
+                #Mine
+                X = patcher(self._uncrypt(self._train_path[0], couple), (30, 32))
+                y = patcher(self._uncrypt(self._train_path[1], couple), (30, 32))
+                """
                 #print("\r"+"validation"+":"+str(index)+"/"+str(len(couples)), sep = ' ', end = '', flush = True)
                 Xsharp = self._uncrypt(self._train_path[0], couple)
                 X, y = self._motion_convolution(Xsharp)
                 index += 1
-                #return X, y 
+                """
                 yield (X, y)
                 
     def _getTest(self, batch_size = None):
@@ -89,11 +97,15 @@ class RedsLoader(Loader):
         while True:
             index = 0
             for couple in couples:
+                #Mine
+                X = patcher(self._uncrypt(self._test_path[0], couple), (30, 32))
+                y = patcher(self._uncrypt(self._test_path[1], couple), (30, 32))
+                """
                 #print("\r"+"test"+":"+str(index)+"/"+str(len(couples)), sep = ' ', end = '', flush = True)
                 Xsharp = self._uncrypt(self._test_path[0], couple)
                 X, y = self._motion_convolution(Xsharp)
                 index += 1
-                #return X, y 
+                """
                 yield (X, y)
 
     def get_Train_Test_Validation(self):
@@ -111,29 +123,17 @@ class RedsLoader(Loader):
 
     def _motion_convolution(self, pic, dim = (30,32)):
         n_patches = int((pic.shape[0] * pic.shape[1])/(dim[0] * dim[1]))
-        #batch_size = Xsharp.shape[0] * n_patches
         X = np.zeros((n_patches, dim[0], dim[1], 3))
         y = np.zeros((n_patches, 73))
-        chosen = []
         kernels = kernel_generator()
-        count = 0
-        #for pic in Xsharp:
         ymodel = np.zeros((73,))
         index = randint(0, len(kernels) - 1)
-        while index in chosen:
-            if len(chosen) >= len(kernels):
-                break
-            else:
-                index = randint(0, len(kernels) - 1)
-                continue
-
-        chosen.append(index)
         patches = patcher(filter2D(pic, -1, kernels[index]), dim)
         ymodel[index] = 1
         for elem in range(n_patches):
-            y[(count * n_patches) + elem] = ymodel
-            X[(count * n_patches) + elem] = patches[elem]
-        count += 1
+            y[elem] = ymodel
+            X[elem] = patches[elem]
+        
         return np.asarray(X), np.asarray(y)
 
     
