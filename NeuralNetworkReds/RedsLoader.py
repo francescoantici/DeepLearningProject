@@ -57,6 +57,7 @@ class RedsLoader(Loader):
         while True:
             index = 0
             for couple in couples:
+                """
                 #Mine
                 X = patcher(self._uncrypt(self._train_path[0], couple), (30, 32))
                 y = patcher(self._uncrypt(self._train_path[1], couple), (30, 32))
@@ -65,7 +66,7 @@ class RedsLoader(Loader):
                 Xsharp = self._uncrypt(self._train_path[0],couple)
                 X, y = self._motion_convolution(Xsharp)
                 index += 1
-                """
+                
                 yield (X, y)
        
         
@@ -78,6 +79,7 @@ class RedsLoader(Loader):
         while True:
             index = 0
             for couple in couples:
+                """
                 #Mine
                 X = patcher(self._uncrypt(self._train_path[0], couple), (30, 32))
                 y = patcher(self._uncrypt(self._train_path[1], couple), (30, 32))
@@ -86,7 +88,7 @@ class RedsLoader(Loader):
                 Xsharp = self._uncrypt(self._train_path[0], couple)
                 X, y = self._motion_convolution(Xsharp)
                 index += 1
-                """
+                
                 yield (X, y)
                 
     def _getTest(self, batch_size = None):
@@ -97,6 +99,7 @@ class RedsLoader(Loader):
         while True:
             index = 0
             for couple in couples:
+                """
                 #Mine
                 X = patcher(self._uncrypt(self._test_path[0], couple), (30, 32))
                 y = patcher(self._uncrypt(self._test_path[1], couple), (30, 32))
@@ -105,7 +108,7 @@ class RedsLoader(Loader):
                 Xsharp = self._uncrypt(self._test_path[0], couple)
                 X, y = self._motion_convolution(Xsharp)
                 index += 1
-                """
+                
                 yield (X, y)
 
     def get_Train_Test_Validation(self):

@@ -44,13 +44,13 @@ def Main(model = "1", mode = "load", master = "local"):
 
   #NEURAL NETWORK EVALUATION ON TEST SET
 
-  NN.evaluate(arguments)
+  #NN.evaluate(arguments)
   
 
   #DISPLAY OF THE RESULTS
 
   #NN.show_different_sigma(Xtest, ytest, [1,2,3])
-  NN.display_sample(arguments)
+  #NN.display_sample(arguments)
   #"""
   #Xtrain, ytrain, Xval, yval = RedsLoader("NeuralNetworkReds/Reds-Dataset").get_train_validation()
   #print(yval.shape)
