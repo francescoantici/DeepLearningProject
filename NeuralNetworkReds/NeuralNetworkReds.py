@@ -4,26 +4,24 @@ from Models.Patcher import reconstruct
 from NeuralNetworkReds.RedsLoader import RedsLoader
 from keras.models import Sequential, Model
 from keras.layers import Conv2D,Input, concatenate, MaxPooling2D, Dense, Activation, Flatten, Dropout, Reshape
-from keras import backend as k
+from keras.optimizers import SGD
 from keras.callbacks import EarlyStopping
 from random import randint
 from PIL import Image
-import sys
 
 class NeuralNetworkReds(NeuralNetwork):
     def __init__(self):
         
         #Paper version
         self._model = Sequential()
-        self._model.add(Conv2D(96, kernel_size = (7,7), activation = 'relu', input_shape = (30,32,3)))
+        self._model.add(Conv2D(96, kernel_size = (7,7), activation = 'relu', input_shape = (30,30,3)))
         self._model.add(MaxPooling2D((2,2), strides = 2))
         self._model.add(Conv2D(256, kernel_size = (5,5), activation = 'relu'))
         self._model.add(MaxPooling2D((2,2), strides = 2))
         self._model.add(Flatten())
         self._model.add(Dense(1024, activation = 'relu'))
-        self._model.add(Dense(73))
-        self._model.add(Activation('softmax'))
-        self._model.compile(optimizer = 'adam', loss = 'mse', metrics=['accuracy'])
+        self._model.add(Dense(73, activation = 'softmax'))
+        self._model.compile(optimizer = 'adam', loss = 'categorical_crossentropy', metrics=['accuracy'])
         """
         #My Version
         self._model = Sequential()

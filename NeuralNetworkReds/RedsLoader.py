@@ -70,7 +70,7 @@ class RedsLoader(Loader):
         while True:
             for couple in couples:
                 Xsharp = self._uncrypt(path,couple)
-                X, y = self._motion_convolution(Xsharp, filters = 4)
+                X, y = self._motion_convolution(Xsharp, n_patches = 1400)
                 np.random.shuffle(X)
                 np.random.shuffle(y)
                 yield (X, y)
@@ -88,18 +88,24 @@ class RedsLoader(Loader):
                 couples.append(tmp)
         return couples
 
-    def _motion_convolution(self, pic, dim = (30,32), stride = None, n_patches = None, filters = 1):
+    def _motion_convolution(self, pic, dim = (30,30), stride = None, n_patches = None, filters = 1):
         if not n_patches:
             n_patches = int((pic.shape[0] * pic.shape[1]) /(dim[0] * dim[1]))    
         X = np.zeros((n_patches, dim[0], dim[1], 3))
         y = np.zeros((n_patches, 73))
         kernels = kernel_generator()
+        index = randint(0, len(kernels) - 1)
+        patches = extract_patches_2d(filter2D(pic, -1, kernels[index]), (30,30), max_patches = n_patches)
+        for i in range(n_patches):
+            X[i] =  patches[i]
+            y[i, index] = 1
+        """
         index = [randint(0, len(kernels) - 1) for i in range(n_patches)] 
         patches = patcher(pic, shape = dim, stride = stride,  n_patches = n_patches)
         for i in range(n_patches):
             X[i] =  filter2D(patches[i], -1, kernels[index[i]])
             y[i, index[i]] = 1
-       
+        """
         
         return X, y
 
