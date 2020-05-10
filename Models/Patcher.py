@@ -2,11 +2,14 @@ import numpy as np
 from PIL import Image
 from scipy.signal import deconvolve
 from cv2 import filter2D
+from random import sample
 
-def patcher(image, shape):
+def patcher(image, shape, stride = None, n_patches = None):
     out = []
-    for row in range(0, image.shape[0], shape[0]):
-        for column in range(0, image.shape[1], shape[1]):
+    if not stride:
+        stride = shape
+    for row in range(0, image.shape[0], stride[0]):
+        for column in range(0, image.shape[1], stride[1]):
             out.append(image[row:row+shape[0], column:column+shape[1], :])
     return np.asarray(out).reshape((len(out), shape[0], shape[1], 3))
 
@@ -23,16 +26,5 @@ def reconstruct(patches, shape, kernel = None):
         out.append(np.asarray(img))
     return np.asarray(out)
     #return deconvolve(np.asarray(out), kernel)
-"""
-kernels = np.load("Models/Kernels.npy", allow_pickle=True)
-pic = np.asarray(Image.open("/Users/francesco/Desktop/RedsDataset/train_sharp/230/00000005.png"))
-blurred = filter2D(pic, -1, kernels[2])
-img1 = Image.fromarray(blurred, 'RGB')
-img1.show()
-img = np.polydiv(blurred,kernels[2])
-img2 = Image.fromarray(img, 'RGB')
-img2.show()
 
-"""
-        
-
+ 

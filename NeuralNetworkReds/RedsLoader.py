@@ -5,7 +5,7 @@ from Models.Patcher import patcher
 from PIL import Image
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.image import extract_patches_2d
-from random import randint, sample, choice
+from random import randint, sample, choice,  shuffle
 import sys
 from cv2 import filter2D
    
@@ -49,70 +49,34 @@ class RedsLoader(Loader):
         #return np.asarray(out)
         return pic
 
-    def _getTrain(self, batch_size = None):
-        if batch_size:
-            couples = self._genCouples(self._train_folders, batch_size)
-        else:
-            couples = [(folder, image) for folder in self._train_folders for image in range(self._n_images)]
+    def _getData(self, data = "train"):
+        switcher = {
+            "train" :{
+                "couples" : [(folder, image) for folder in self._train_folders for image in range(self._n_images)],
+                "path" : self._train_path[0]
+            },
+            "validation" : {
+                "couples" : [(folder, image) for folder in self._val_folders for image in range(self._n_images)],
+                "path" : self._train_path[0]
+            },
+            "test" : {
+                "couples" : [(folder, image) for folder in self._test_folders for image in range(self._n_images)],
+                "path" : self._test_path[0]
+            }
+        }
+        couples = switcher[data]["couples"]
+        path = switcher[data]["path"]
+        shuffle(couples)
         while True:
-            index = 0
             for couple in couples:
-                """
-                #Mine
-                X = patcher(self._uncrypt(self._train_path[0], couple), (30, 32))
-                y = patcher(self._uncrypt(self._train_path[1], couple), (30, 32))
-                """
-                #print("\r"+"train"+":"+str(index)+"/"+str(len(couples)), sep = ' ', end = '', flush = True)
-                Xsharp = self._uncrypt(self._train_path[0],couple)
-                X, y = self._motion_convolution(Xsharp)
-                index += 1
-                
-                yield (X, y)
-       
-        
-    
-    def _getVal(self, batch_size = None):
-        if batch_size:
-            couples = self._genCouples(self._val_folders, batch_size)
-        else:
-            couples = [(folder, image) for folder in self._val_folders for image in range(self._n_images)]
-        while True:
-            index = 0
-            for couple in couples:
-                """
-                #Mine
-                X = patcher(self._uncrypt(self._train_path[0], couple), (30, 32))
-                y = patcher(self._uncrypt(self._train_path[1], couple), (30, 32))
-                """
-                #print("\r"+"validation"+":"+str(index)+"/"+str(len(couples)), sep = ' ', end = '', flush = True)
-                Xsharp = self._uncrypt(self._train_path[0], couple)
-                X, y = self._motion_convolution(Xsharp)
-                index += 1
-                
-                yield (X, y)
-                
-    def _getTest(self, batch_size = None):
-        if batch_size:
-            couples = self._genCouples(self._test_folders, batch_size)
-        else:
-            couples = [(folder, image) for folder in self._test_folders for image in range(self._n_images)]
-        while True:
-            index = 0
-            for couple in couples:
-                """
-                #Mine
-                X = patcher(self._uncrypt(self._test_path[0], couple), (30, 32))
-                y = patcher(self._uncrypt(self._test_path[1], couple), (30, 32))
-                """
-                #print("\r"+"test"+":"+str(index)+"/"+str(len(couples)), sep = ' ', end = '', flush = True)
-                Xsharp = self._uncrypt(self._test_path[0], couple)
-                X, y = self._motion_convolution(Xsharp)
-                index += 1
-                
+                Xsharp = self._uncrypt(path,couple)
+                X, y = self._motion_convolution(Xsharp, filters = 4)
+                np.random.shuffle(X)
+                np.random.shuffle(y)
                 yield (X, y)
 
     def get_Train_Test_Validation(self):
-        return (self._getTrain, self._getVal, self._getTest)
+        return self._getData
 
     def _genCouples(self, folders, batch_size):
         couples = []
@@ -124,20 +88,20 @@ class RedsLoader(Loader):
                 couples.append(tmp)
         return couples
 
-    def _motion_convolution(self, pic, dim = (30,32)):
-        n_patches = int((pic.shape[0] * pic.shape[1])/(dim[0] * dim[1]))
+    def _motion_convolution(self, pic, dim = (30,32), stride = None, n_patches = None, filters = 1):
+        if not n_patches:
+            n_patches = int((pic.shape[0] * pic.shape[1]) /(dim[0] * dim[1]))    
         X = np.zeros((n_patches, dim[0], dim[1], 3))
         y = np.zeros((n_patches, 73))
         kernels = kernel_generator()
-        ymodel = np.zeros((73,))
-        index = randint(0, len(kernels) - 1)
-        patches = patcher(filter2D(pic, -1, kernels[index]), dim)
-        ymodel[index] = 1
-        for elem in range(n_patches):
-            y[elem] = ymodel
-            X[elem] = patches[elem]
+        index = [randint(0, len(kernels) - 1) for i in range(n_patches)] 
+        patches = patcher(pic, shape = dim, stride = stride,  n_patches = n_patches)
+        for i in range(n_patches):
+            X[i] =  filter2D(patches[i], -1, kernels[index[i]])
+            y[i, index[i]] = 1
+       
         
-        return np.asarray(X), np.asarray(y)
+        return X, y
 
     
 
