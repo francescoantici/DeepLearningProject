@@ -53,15 +53,15 @@ class RedsLoader(Loader):
         switcher = {
             "train" :{
                 "couples" : [(folder, image) for folder in self._train_folders for image in range(self._n_images)],
-                "path" : self._train_path[0]
+                "path" : self._train_path[1]
             },
             "validation" : {
                 "couples" : [(folder, image) for folder in self._val_folders for image in range(self._n_images)],
-                "path" : self._train_path[0]
+                "path" : self._train_path[1]
             },
             "test" : {
                 "couples" : [(folder, image) for folder in self._test_folders for image in range(self._n_images)],
-                "path" : self._test_path[0]
+                "path" : self._test_path[1]
             }
         }
         couples = switcher[data]["couples"]
@@ -88,14 +88,14 @@ class RedsLoader(Loader):
                 couples.append(tmp)
         return couples
 
-    def _motion_convolution(self, pic, dim = (30,30), stride = None, n_patches = None, filters = 1):
+    def _motion_convolution(self, pic, dim = (30,32), stride = None, n_patches = None, filters = 1):
         if not n_patches:
             n_patches = int((pic.shape[0] * pic.shape[1]) /(dim[0] * dim[1]))    
         X = np.zeros((n_patches, dim[0], dim[1], 3))
         y = np.zeros((n_patches, 73))
         kernels = kernel_generator()
         index = randint(0, len(kernels) - 1)
-        patches = extract_patches_2d(filter2D(pic, -1, kernels[index]), (30,30), max_patches = n_patches)
+        patches = extract_patches_2d(filter2D(pic, -1, kernels[index]), (30,32), max_patches = n_patches)
         for i in range(n_patches):
             X[i] =  patches[i]
             y[i, index] = 1
