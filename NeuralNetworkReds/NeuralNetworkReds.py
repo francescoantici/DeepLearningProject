@@ -14,7 +14,7 @@ class NeuralNetworkReds(NeuralNetwork):
         
         #Paper version
         self._model = Sequential()
-        self._model.add(Conv2D(96, kernel_size = (7,7), activation = 'relu', input_shape = (30,30,3)))
+        self._model.add(Conv2D(96, kernel_size = (7,7), activation = 'relu', input_shape = (30,32,3)))
         self._model.add(MaxPooling2D((2,2), strides = 2))
         self._model.add(Conv2D(256, kernel_size = (5,5), activation = 'relu'))
         self._model.add(MaxPooling2D((2,2), strides = 2))
@@ -39,7 +39,7 @@ class NeuralNetworkReds(NeuralNetwork):
     def fit(self, datagen, epochs = 1):
         es = EarlyStopping(monitor = 'val_accuracy', mode = max, restore_best_weights = True, verbose = 1, patience = 100)
         #es = EarlyStopping(monitor = 'val_loss', mode = min, restore_best_weights = True, verbose = 1, patience = 10)
-        self._model.fit_generator(datagen("train"), steps_per_epoch = 64, epochs = epochs, callbacks = [es], validation_data = datagen("validation"), validation_steps = 16)
+        self._model.fit_generator(datagen("train"), steps_per_epoch = 128, epochs = epochs, callbacks = [es], validation_data = datagen("validation"), validation_steps = 32)
 
             
             
