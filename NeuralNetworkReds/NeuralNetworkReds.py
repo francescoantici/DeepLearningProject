@@ -100,7 +100,8 @@ class NeuralNetworkReds(NeuralNetwork):
     def display_sample(self, datagen):
         _, _, testgen = datagen
         X, y = next(testgen)
-        generated = reconstruct(self._generator.predict(preprocess(X).reshape((1, 256, 256, 3)))).reshape((256,256,3))
+        #generated = reconstruct(self._generator.predict(preprocess(X).reshape((1, 256, 256, 3)))).reshape((256,256,3))
+        generated = reconstruct(self._generator.predict(preprocess(X).reshape((1, 720, 1280, 3)))).reshape((720,1280,3))
         data = [np.asarray(X), np.asarray(y), generated]
         for batch in data:
             img = Image.fromarray(batch, 'RGB')
