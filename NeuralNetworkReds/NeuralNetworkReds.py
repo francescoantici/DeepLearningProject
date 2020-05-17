@@ -78,12 +78,12 @@ class NeuralNetworkReds():
                     d_loss = 0.5 * np.add(d_loss_fake, d_loss_real)
                     d_losses.append(d_loss)
 
-                d.trainable = False
+                self._discriminator.trainable = False
 
                 d_on_g_loss = self._g_d_m.train_on_batch(image_blur_batch, [image_full_batch, output_true_batch])
                 d_on_g_losses.append(d_on_g_loss)
 
-                d.trainable = True
+                self._discriminator.trainable = True
 
             print(np.mean(d_losses), np.mean(d_on_g_losses))
 
