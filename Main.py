@@ -6,7 +6,6 @@ from NeuralNetworkReds.NeuralNetworkReds import NeuralNetworkReds
 from PIL import Image
 import sys
 from scipy.io import loadmat
-
   
 def Main(model = "1", mode = "load", master = "local"):
 
@@ -38,7 +37,7 @@ def Main(model = "1", mode = "load", master = "local"):
   if mode == "load":
     NN.load_weights(weights) 
   elif mode == "train":
-    NN.fit(arguments, epochs = 300)
+    NN.fit(arguments, epochs = 1)
     NN.save(weights)
   else: 
     raise Exception("The specified method is not valid, please insert train or load")

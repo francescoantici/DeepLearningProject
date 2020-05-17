@@ -1,19 +1,20 @@
 import numpy as np
-from Models.NeuralNetwork import NeuralNetwork
+from Models.Losses import MSE, PSNR
 from keras.models import Sequential,Model
 from keras.layers import Conv2D,Input,concatenate
 from keras.callbacks import EarlyStopping
 from random import randint
+from SSIM_PIL import compare_ssim
 from PIL import Image
 from cv2 import GaussianBlur
 
 
-class NeuralNetworkCifar10(NeuralNetwork):
+class NeuralNetworkCifar10():
     def __init__(self):
-        
+        self.image_shape = (32,32,3)
         #The network is composed of 8 layers, and given the low dimensionality of the image the filter dimension is always pretty low
         self._model = Sequential()
-        image = Input(shape = (32,32,3))
+        image = Input(shape = self.image_shape)
         feat_extraction = Conv2D(filters = 64, kernel_size = (5,5), padding = 'same', activation = 'relu', input_shape = (32,32,3), use_bias = True) (image)
         feat_enhanced = Conv2D(filters = 64, kernel_size = (3,3), padding = 'same', activation = 'relu', use_bias = True) (feat_extraction)
         merge = concatenate([feat_extraction,feat_enhanced])
@@ -51,10 +52,25 @@ class NeuralNetworkCifar10(NeuralNetwork):
             img2.show(title = 'reconstructed sigma = ' + str(list_sigma[i]))
         
     def evaluate(self, arguments, display = True):
-        Xtrain, ytrain, Xval, yval, Xtest, ytest = arguments
-        return super()._evaluate(Xtest, ytest, display = display)
-    
-    def display_sample(self, arguments):
-        Xtrain, ytrain, Xval, yval, Xtest, ytest = arguments
-        return super()._display_sample(Xtest, ytest)
+        _, _, _, _, X, y = arguments
+        y_pred = self._model.predict(X)
+        ssim = np.mean(np.asarray([compare_ssim(Image.fromarray(y[i], 'RGB'), Image.fromarray(y_pred[i], 'RGB')) for i in range(len(y))]))
 
+        print("The loss functions on the test set are MSE: {:.2f}, SSIM: {:.2f}, PSNR: {:.2f}.".format(MSE(y, y_pred), ssim, PSNR(y, y_pred)))
+    
+    def save(self, file_name):
+        self._model.save_weights(file_name)
+    
+    #Allows to skip the training(fit) part 
+    def load_weights(self, file_name):
+        self._model.load_weights(file_name) 
+    
+    #Display Original, Smoothed and De-Blurred image of a random element of the given set
+    def display_sample(self,arguments):
+        _, _, _, _, X, y = arguments
+        i = randint(0,y.shape[0]-1)
+        img = np.concatenate((X[i], self._model.predict(X[i].reshape((1, self.image_shape[0], self.image_shape[1], 3))).reshape(self.image_shape).astype('uint8')), axis = 1)
+        data = [y[i], img.astype('uint8')]
+        for batch in data:
+            img = Image.fromarray(batch, 'RGB')
+            img.show()

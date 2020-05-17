@@ -1,5 +1,5 @@
 import numpy as np
-from Models.NeuralNetwork import NeuralNetwork
+import tensorflow as tf
 from Models.Processing import *
 from Models.Losses import *
 from NeuralNetworkReds.RedsLoader import RedsLoader
@@ -11,14 +11,12 @@ from keras.layers.core import Dense, Flatten, Lambda
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import Adam
 from keras.models import Model
+from SSIM_PIL import compare_ssim
 from random import randint
 from PIL import Image
 
-
-
-class NeuralNetworkReds(NeuralNetwork):
+class NeuralNetworkReds():
     def __init__(self):
-        
         # the paper defined hyper-parameter:chr
         self.channel_rate = 64
         # Note the image_shape must be multiple of patch_shape
@@ -29,8 +27,8 @@ class NeuralNetworkReds(NeuralNetwork):
         self.ndf = 64
         self.input_nc = 3
         self.output_nc = 3
-        self.input_shape_generator = (256, 256, self.input_nc)
-        self.input_shape_discriminator = (256, 256, self.output_nc)
+        self.input_shape_generator = (self.image_shape[0], self.image_shape[1], self.input_nc)
+        self.input_shape_discriminator = (self.image_shape[0], self.image_shape[1], self.output_nc)
         self.n_blocks_gen = 9
 
         self._generator = self._generator_model()
@@ -55,9 +53,6 @@ class NeuralNetworkReds(NeuralNetwork):
         self._discriminator.trainable = True
 
         output_true_batch, output_false_batch = np.ones((batch_size, 1)), -np.ones((batch_size, 1))
-
-        
-
         for epoch in range(epochs):
 
             d_losses = []
@@ -69,9 +64,9 @@ class NeuralNetworkReds(NeuralNetwork):
                     d = next(train)
                     x_train.append(patcher(d[0]))
                     y_train.append(patcher(d[1]))
-                x_train = np.asarray(x_train).reshape(batch_size * 15, 256, 256, 3)
-                y_train = np.asarray(y_train).reshape(batch_size * 15, 256, 256, 3)
-                batch_indexes = np.random.permutation(batch_size * 15)
+                x_train = np.asarray(x_train).reshape(batch_size * 15, self.image_shape[0], self.image_shape[1], 3)
+                y_train = np.asarray(y_train).reshape(batch_size * 15, self.image_shape[0], self.image_shape[1], 3)
+                batch_indexes = np.random.permutation(batch_size)
                 image_blur_batch = x_train[batch_indexes]
                 image_full_batch = y_train[batch_indexes]
 
@@ -97,24 +92,42 @@ class NeuralNetworkReds(NeuralNetwork):
         pictures = 1
         x = []
         y = []
+        #Case output is 720x1280
+        """
         for i in range(pictures):
                 d = next(testgen)
                 x.append(patcher(d[0]))
-                y.append(np.asarray(d[1]))
-        generated = self._generator.predict(np.asarray(x).reshape(pictures*15, 256, 256, 3))
-        y_pred = [reconstruct(generated[i:i+15]) for i in range(0,generated.shape[0], 15)]
-        print("The loss function on the test set is : {}".format(perceptual_loss_100(np.asarray(y), np.asarray(y_pred))))
-
-
+                y.append(patcher(d[1]))
+        generated = self._generator.predict(np.asarray(x).reshape(pictures*15, self.image_shape[0], self.image_shape[1], 3))
+        y_pred = np.asarray([deprocess_image(elem) for elem in generated])
+        y = np.asarray(y)
+        """
+        #Case 256x256
+        for i in range(pictures):
+                d = next(testgen)
+                x.append(preprocess(d[0]))
+                y.append(preprocess(d[1]))
+        generated = self._generator.predict(np.asarray(x))
+        y_pred = np.asarray([deprocess_image(elem) for elem in generated])
+        y = np.asarray(y)
+        ssim = np.mean(np.asarray([compare_ssim(Image.fromarray(y[i], 'RGB'), Image.fromarray(y_pred[i], 'RGB')) for i in range(len(y))]))
+        print("The loss functions on the test set are MSE: {:.2f}, SSIM: {:.2f}, PSNR: {:.2f}.".format(MSE(y, y_pred), ssim, PSNR(y, y_pred)))
     
     def display_sample(self, datagen):
         _, _, testgen = datagen
         X, y = next(testgen)
         patches = patcher(X)
+        #Case 720x1280
         data = [np.asarray(X), np.asarray(y), reconstruct(self._generator.predict(patches))]
+        #Case 256x256
+        #data = [np.asarray(X.resize((self.image_shape[0], self.image_shape[1]))), np.asarray(y.resize((self.image_shape[0], self.image_shape[1]))), deprocess_image(self._generator.predict(preprocess(X).reshape(1,self.image_shape[0], self.image_shape[1],3)).reshape(self.image_shape))]
+        #Case Side by Side
+        img = np.concatenate((np.asarray(X.resize((self.image_shape[0], self.image_shape[1]))), deprocess_image(self._generator.predict(preprocess(X).reshape(1,self.image_shape[0], self.image_shape[1],3)).reshape(self.image_shape))), axis = 1)
+        data = [img, np.asarray(y.resize((self.image_shape[0], self.image_shape[1])))]
+        titles = iter(["Blurred", "Original", "Generated"])
         for batch in data:
             img = Image.fromarray(batch, 'RGB')
-            img.show()
+            img.show(title = next(titles))
 
     def _generator_model(self):
         """Build generator architecture."""
@@ -156,7 +169,6 @@ class NeuralNetworkReds(NeuralNetwork):
         model = Model(inputs=inputs, outputs=outputs, name='Generator')
         return model
 
-
     def _discriminator_model(self):
         """Build discriminator architecture."""
         n_layers, use_sigmoid = 3, False
@@ -188,14 +200,12 @@ class NeuralNetworkReds(NeuralNetwork):
         model = Model(inputs=inputs, outputs=x, name='Discriminator')
         return model
 
-
     def _generator_containing_discriminator(self, generator, discriminator):
         inputs = Input(shape=self.image_shape)
         generated_image = generator(inputs)
         outputs = discriminator(generated_image)
         model = Model(inputs=inputs, outputs=outputs)
         return model
-
 
     def _generator_containing_discriminator_multiple_outputs(self, generator, discriminator):
         inputs = Input(shape=self.image_shape)
