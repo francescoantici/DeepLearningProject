@@ -38,7 +38,7 @@ class NeuralNetworkReds():
         
     def fit(self, datagen, epochs = 1, critic_updates = 5):
         batch_size =  100
-        train_size = 21000
+        train_size = 200
         train, _, _ = datagen
 
         d_opt = Adam(lr=1E-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
