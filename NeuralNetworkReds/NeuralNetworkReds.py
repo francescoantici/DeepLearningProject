@@ -62,8 +62,8 @@ class NeuralNetworkReds():
                 y_train = []
                 for i in range(batch_size):
                     d = next(train)
-                    x_train.append(d[0])
-                    y_train.append(d[1])
+                    x_train.append(preprocess(d[0]))
+                    y_train.append(preprocess(d[1]))
                 x_train = np.asarray(x_train).reshape(batch_size, self.image_shape[0], self.image_shape[1], 3)
                 y_train = np.asarray(y_train).reshape(batch_size, self.image_shape[0], self.image_shape[1], 3)
                 batch_indexes = np.random.permutation(batch_size)
