@@ -37,8 +37,8 @@ class NeuralNetworkReds():
         self._g_d_m = self._generator_containing_discriminator_multiple_outputs(self._generator, self._discriminator)
         
     def fit(self, datagen, epochs = 1, critic_updates = 5):
-        batch_size =  100
-        train_size = 200
+        batch_size =  128
+        train_size = 21000
         train, _, _ = datagen
 
         d_opt = Adam(lr=1E-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
@@ -62,10 +62,10 @@ class NeuralNetworkReds():
                 y_train = []
                 for i in range(batch_size):
                     d = next(train)
-                    x_train.append(patcher(d[0]))
-                    y_train.append(patcher(d[1]))
-                x_train = np.asarray(x_train).reshape(batch_size * 15, self.image_shape[0], self.image_shape[1], 3)
-                y_train = np.asarray(y_train).reshape(batch_size * 15, self.image_shape[0], self.image_shape[1], 3)
+                    x_train.append(d[0])
+                    y_train.append(d[1])
+                x_train = np.asarray(x_train).reshape(batch_size, self.image_shape[0], self.image_shape[1], 3)
+                y_train = np.asarray(y_train).reshape(batch_size, self.image_shape[0], self.image_shape[1], 3)
                 batch_indexes = np.random.permutation(batch_size)
                 image_blur_batch = x_train[batch_indexes]
                 image_full_batch = y_train[batch_indexes]
