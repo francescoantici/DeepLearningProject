@@ -37,7 +37,7 @@ class NeuralNetworkReds():
         self._g_d_m = self._generator_containing_discriminator_multiple_outputs(self._generator, self._discriminator)
         
     def fit(self, datagen, epochs = 1, critic_updates = 5):
-        batch_size =  128
+        batch_size =  64
         train_size = 21000
         train, _, _ = datagen
 
