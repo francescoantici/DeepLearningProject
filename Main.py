@@ -37,7 +37,7 @@ def Main(model = "1", mode = "load", master = "local"):
   if mode == "load":
     NN.load_weights(weights) 
   elif mode == "train":
-    NN.fit(arguments, epochs = 1)
+    NN.fit(arguments, epochs = 20)
     NN.save(weights)
   else: 
     raise Exception("The specified method is not valid, please insert train or load")
