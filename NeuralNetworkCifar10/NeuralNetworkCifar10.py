@@ -13,6 +13,7 @@ class NeuralNetworkCifar10():
     def __init__(self):
         self.image_shape = (32,32,3)
         #The network is composed of 8 layers, and given the low dimensionality of the image the filter dimension is always pretty low
+        """
         self._model = Sequential()
         image = Input(shape = self.image_shape)
         feat_extraction = Conv2D(filters = 64, kernel_size = (5,5), padding = 'same', activation = 'relu', input_shape = (32,32,3), use_bias = True) (image)
@@ -22,6 +23,16 @@ class NeuralNetworkCifar10():
         third = Conv2D(filters = 64, kernel_size = (3,3), padding = 'same', activation = 'relu', use_bias = True) (second_order)
         fourth = Conv2D(filters = 32, kernel_size = (5,5), padding = 'same', activation = 'relu', use_bias = True) (third)
         reconstruction = Conv2D(filters = 3, kernel_size = (3,3), padding = 'same', use_bias = True) (fourth)
+        self._model = Model(inputs = image, outputs = reconstruction)
+        self._model.compile(optimizer = 'adam', loss = 'mse', metrics=['accuracy'])
+        """
+        self._model = Sequential()
+        image = Input(shape = self.image_shape)
+        feat_extraction = Conv2D(filters = 32, kernel_size = (5,5), padding = 'same', activation = 'relu', input_shape = (32,32,3), use_bias = True) (image)
+        feat_enhanced = Conv2D(filters = 32, kernel_size = (3,3), padding = 'same', activation = 'relu', use_bias = True) (feat_extraction)
+        merge = concatenate([feat_extraction,feat_enhanced], axis = 1)
+        second_order = Conv2D(filters = 32, kernel_size = (1,1), padding = 'valid' ,activation = 'relu', use_bias = True) (merge)
+        reconstruction = Conv2D(filters = 3, kernel_size = (3,3), padding = 'same', use_bias = True) (second_order)
         self._model = Model(inputs = image, outputs = reconstruction)
         self._model.compile(optimizer = 'adam', loss = 'mse', metrics=['accuracy'])
         
