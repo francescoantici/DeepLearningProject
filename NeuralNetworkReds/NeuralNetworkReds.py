@@ -1,5 +1,4 @@
 import numpy as np
-import tensorflow as tf
 from Models.Processing import *
 from Models.Losses import *
 from NeuralNetworkReds.RedsLoader import RedsLoader
@@ -11,7 +10,6 @@ from keras.layers.core import Dense, Flatten, Lambda
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import Adam
 from keras.models import Model
-from SSIM_PIL import compare_ssim
 from random import randint
 from PIL import Image
 
@@ -19,7 +17,7 @@ class NeuralNetworkReds():
     def __init__(self):
         # the paper defined hyper-parameter:chr
         self.channel_rate = 64
-        # Note the image_shape must be multiple of patch_shape
+        # The image shape is taken from the paper
         self.image_shape = (256, 256, 3)
         self.patch_shape = (self.channel_rate, self.channel_rate, 3)
 
@@ -89,18 +87,23 @@ class NeuralNetworkReds():
 
     def evaluate(self, datagen, display = True):
         _, _, testgen = datagen
-        pictures = 1
+        pictures = 10
         x = []
         y = []
+        
         #Case output is 720x1280
-        """
+        
         for i in range(pictures):
                 d = next(testgen)
                 x.append(patcher(d[0]))
                 y.append(patcher(d[1]))
-        generated = self._generator.predict(np.asarray(x).reshape(pictures*15, self.image_shape[0], self.image_shape[1], 3))
-        y_pred = np.asarray([deprocess_image(elem) for elem in generated])
-        y = np.asarray(y)
+        x = np.asarray(x).reshape(pictures*15, self.image_shape[0], self.image_shape[1], 3)
+        y = np.asarray(y).reshape(pictures*15, self.image_shape[0], self.image_shape[1], 3)
+        generated = self._generator.predict(x)
+        x = np.asarray([reconstruct(x[i*15: (i*15) + 15]) for i in range(pictures)])
+        y = np.asarray([reconstruct(y[i*15: (i*15) + 15]) for i in range(pictures)])
+        y_pred = np.asarray([reconstruct(generated[i*15: (i*15) + 15]) for i in range(pictures)])
+        
         """
         #Case 256x256
         for i in range(pictures):
@@ -110,24 +113,27 @@ class NeuralNetworkReds():
         generated = self._generator.predict(np.asarray(x))
         y_pred = np.asarray([deprocess_image(elem) for elem in generated])
         y = np.asarray(y)
-        ssim = np.mean(np.asarray([compare_ssim(Image.fromarray(y[i], 'RGB'), Image.fromarray(y_pred[i], 'RGB')) for i in range(len(y))]))
-        print("The loss functions on the test set are MSE: {:.2f}, SSIM: {:.2f}, PSNR: {:.2f}.".format(MSE(y, y_pred), ssim, PSNR(y, y_pred)))
+        """
+        SSIM = np.mean(np.asarray([ssim(y[i], y_pred[i]) for i in range(len(y))]))
+        print("\nEvaluation over {} images from the test set\n".format(str(pictures)))
+        printer(MSE(y, y_pred), SSIM, PSNR(y, y_pred))
+        i = randint(0, pictures - 1)
+        self.display_sample(x[i], y[i], y_pred[i])
+        print("\nEvaluation on the displayed image\n")
+        printer(MSE(y[i], y_pred[i]), ssim(y[i], y_pred[i]), PSNR(y[i], y_pred[i]))
+        
     
-    def display_sample(self, datagen):
-        _, _, testgen = datagen
-        X, y = next(testgen)
-        patches = patcher(X)
+    def display_sample(self, X, y, y_pred):
         #Case 720x1280
-        data = [np.asarray(X), np.asarray(y), reconstruct(self._generator.predict(patches))]
+        data = [X, y, y_pred]
         #Case 256x256
         #data = [np.asarray(X.resize((self.image_shape[0], self.image_shape[1]))), np.asarray(y.resize((self.image_shape[0], self.image_shape[1]))), deprocess_image(self._generator.predict(preprocess(X).reshape(1,self.image_shape[0], self.image_shape[1],3)).reshape(self.image_shape))]
         #Case Side by Side
-        img = np.concatenate((np.asarray(X.resize((self.image_shape[0], self.image_shape[1]))), deprocess_image(self._generator.predict(preprocess(X).reshape(1,self.image_shape[0], self.image_shape[1],3)).reshape(self.image_shape))), axis = 1)
-        data = [img, np.asarray(y.resize((self.image_shape[0], self.image_shape[1])))]
-        titles = iter(["Blurred", "Original", "Generated"])
+        #img = np.concatenate((np.asarray(X.resize((self.image_shape[0], self.image_shape[1]))), deprocess_image(self._generator.predict(preprocess(X).reshape(1,self.image_shape[0], self.image_shape[1],3)).reshape(self.image_shape))), axis = 1)
+        #data = [img, np.asarray(y.resize((self.image_shape[0], self.image_shape[1])))]
         for batch in data:
             img = Image.fromarray(batch, 'RGB')
-            img.show(title = next(titles))
+            img.show()
 
     def _generator_model(self):
         """Build generator architecture."""

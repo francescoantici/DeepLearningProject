@@ -5,7 +5,6 @@ from NeuralNetworkReds.RedsLoader import RedsLoader
 from NeuralNetworkReds.NeuralNetworkReds import NeuralNetworkReds
 from PIL import Image
 import sys
-from scipy.io import loadmat
   
 def Main(model = "1", mode = "load", master = "local"):
 
@@ -43,18 +42,11 @@ def Main(model = "1", mode = "load", master = "local"):
     raise Exception("The specified method is not valid, please insert train or load")
   
 
-  #NEURAL NETWORK EVALUATION ON TEST SET
+  #NEURAL NETWORK EVALUATION ON TEST SET AND DISPLAY OF THE RESULTS
 
-  #NN.evaluate(arguments)
+  NN.evaluate(arguments)
   
 
-  #DISPLAY OF THE RESULTS
-
-  #NN.show_different_sigma(Xtest, ytest, [1,2,3])
-  NN.display_sample(arguments)
-  #"""
-  #Xtrain, ytrain, Xval, yval = RedsLoader("NeuralNetworkReds/Reds-Dataset").get_train_validation()
-  #print(yval.shape)
 
 CNN = {
     "1" : {

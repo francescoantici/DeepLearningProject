@@ -1,13 +1,8 @@
 import numpy as np 
-from Models.Kernels import kernel_generator
 from Models.Loader import Loader
 from Models.Processing import preprocess
 from PIL import Image
-from sklearn.model_selection import train_test_split
-from sklearn.feature_extraction.image import extract_patches_2d
-from random import randint, sample, choice,  shuffle
-import sys
-from cv2 import filter2D
+from random import randint, sample,  shuffle
    
 class RedsLoader(Loader):
     
@@ -33,7 +28,6 @@ class RedsLoader(Loader):
             folder = "/0" +str(f)
         else:
             folder = "/" + str(f)
-        sys.stdout.flush()
         if img < 10:
             image = "/0000000" + str(img) + ".png"
         elif img < 100:

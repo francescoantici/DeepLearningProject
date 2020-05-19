@@ -18,7 +18,7 @@ def patcher(image, shape = (256, 256), stride = (256 - 24, 256)):
                         out.append(image[row:row+shape[0], column:column+shape[1], :])
         return np.asarray(out).reshape((len(out), shape[0], shape[1], 3))
 
-def reconstruct(patches, shape = (720, 1280)):
+def reconstruct(patches, shape = (720, 1280), deprocess = True):
         out = []
         batch = int(patches.shape[0] / int((shape[0] * shape[1]) / (patches.shape[1] * patches.shape[2])))
         columns = int(shape[1] / patches.shape[2])
@@ -26,7 +26,10 @@ def reconstruct(patches, shape = (720, 1280)):
         img  = Image.fromarray(np.zeros((shape[0], shape[1], 3)), 'RGB')
         for row in range(rows):
                 for column in range(columns):
-                        img.paste(Image.fromarray(deprocess_image(patches[columns*row + column]), 'RGB') , (column*patches.shape[2], row*(patches.shape[1] - 24) ))
+                        if deprocess:
+                                img.paste(Image.fromarray(deprocess_image(patches[columns*row + column]), 'RGB') , (column*patches.shape[2], row*(patches.shape[1] - 24) ))
+                        else:
+                                img.paste(Image.fromarray(patches[columns*row + column], 'RGB') , (column*patches.shape[2], row*(patches.shape[1] - 24) ))
         out.append(np.asarray(img))
         
         return np.asarray(out).astype('uint8').reshape((shape[0], shape[1], 3))

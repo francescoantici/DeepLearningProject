@@ -1,10 +1,9 @@
 import numpy as np
-from Models.Losses import MSE, PSNR
-from keras.models import Sequential,Model
-from keras.layers import Conv2D,Input,concatenate
+from Models.Losses import MSE, PSNR, printer, ssim
+from keras.models import Sequential, Model
+from keras.layers import Conv2D, Input, concatenate
 from keras.callbacks import EarlyStopping
 from random import randint
-from SSIM_PIL import compare_ssim
 from PIL import Image
 from cv2 import GaussianBlur
 
@@ -65,9 +64,14 @@ class NeuralNetworkCifar10():
     def evaluate(self, arguments, display = True):
         _, _, _, _, X, y = arguments
         y_pred = self._model.predict(X)
-        ssim = np.mean(np.asarray([compare_ssim(Image.fromarray(y[i], 'RGB'), Image.fromarray(y_pred[i], 'RGB')) for i in range(len(y))]))
+        SSIM = np.mean(np.asarray([ssim(y[i], y_pred[i]) for i in range(len(y))]))
+        print("\nEvaluation over {} images from the test set\n".format(len(X)))
+        printer(MSE(y, y_pred), SSIM, PSNR(y, y_pred))
+        i = randint(0, y.shape[0] - 1)
+        self.display_sample(X[i], y[i], y_pred[i])
+        print("\nEvaluation on the displayed image\n")
+        printer(MSE(y[i], y_pred[i]), ssim(y[i], y_pred[i]), PSNR(y[i], y_pred[i]))
 
-        print("The loss functions on the test set are MSE: {:.2f}, SSIM: {:.2f}, PSNR: {:.2f}.".format(MSE(y, y_pred), ssim, PSNR(y, y_pred)))
     
     def save(self, file_name):
         self._model.save_weights(file_name)
@@ -77,11 +81,9 @@ class NeuralNetworkCifar10():
         self._model.load_weights(file_name) 
     
     #Display Original, Smoothed and De-Blurred image of a random element of the given set
-    def display_sample(self,arguments):
-        _, _, _, _, X, y = arguments
-        i = randint(0,y.shape[0]-1)
-        img = np.concatenate((X[i], self._model.predict(X[i].reshape((1, self.image_shape[0], self.image_shape[1], 3))).reshape(self.image_shape).astype('uint8')), axis = 1)
-        data = [y[i], img.astype('uint8')]
+    def display_sample(self, X, y, y_pred):
+        img = np.concatenate((X, y_pred), axis = 1)
+        data = [y, img.astype('uint8')]
         for batch in data:
             img = Image.fromarray(batch, 'RGB')
             img.show()
