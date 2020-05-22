@@ -19,6 +19,7 @@ class RedsLoader(Loader):
         self._n_images = 100
 
     def _uncrypt(self, files, images):
+        #Read a single image in the format (folder, image)
         out = []
         f = images[0]
         img = images[1]
@@ -36,6 +37,7 @@ class RedsLoader(Loader):
         return pic
 
     def _getData(self, data = "train"):
+        #Return a generator of the train/val/test set in the format (X, y)
         switcher = {
             "train" :{
                 "couples" : [(folder, image) for folder in self._train_folders for image in range(self._n_images)],

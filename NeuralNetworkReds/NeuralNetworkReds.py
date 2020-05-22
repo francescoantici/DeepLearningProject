@@ -136,8 +136,7 @@ class NeuralNetworkReds():
             img.show()
 
     def _generator_model(self):
-        """Build generator architecture."""
-        # Current version : ResNet block
+        #Build generator architecture
         inputs = Input(shape = self.image_shape)
 
         x = ReflectionPadding2D((3, 3))(inputs)
@@ -176,7 +175,7 @@ class NeuralNetworkReds():
         return model
 
     def _discriminator_model(self):
-        """Build discriminator architecture."""
+        #Build discriminator architecture
         n_layers, use_sigmoid = 3, False
         inputs = Input(shape=self.input_shape_discriminator)
 
