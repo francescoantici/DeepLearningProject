@@ -87,7 +87,7 @@ class NeuralNetworkReds():
 
     def evaluate(self, datagen, display = True):
         _, _, testgen = datagen
-        pictures = 10
+        pictures = 300
         x = []
         y = []
         
