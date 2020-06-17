@@ -31,8 +31,8 @@ class NeuralNetworkReds():
 
         self._generator = self._generator_model()
         self._discriminator = self._discriminator_model()
-        self._g_d = self._generator_containing_discriminator(self._generator_model(), self._discriminator_model())
-        self._g_d_m = self._generator_containing_discriminator_multiple_outputs(self._generator, self._discriminator)
+        #self._g_d = self._generator_containing_discriminator(self._generator_model(), self._discriminator_model())
+        self._g_d_m = self._generator_containing_discriminator(self._generator, self._discriminator)
         
     def fit(self, datagen, epochs = 1, critic_updates = 5):
         batch_size =  64
@@ -87,7 +87,7 @@ class NeuralNetworkReds():
 
     def evaluate(self, datagen, display = True):
         _, _, testgen = datagen
-        pictures = 300
+        pictures = 1
         x = []
         y = []
         
@@ -157,7 +157,6 @@ class NeuralNetworkReds():
 
         for i in range(n_downsampling):
             mult = 2**(n_downsampling - i)
-            # x = Conv2DTranspose(filters=int(ngf * mult / 2), kernel_size=(3, 3), strides=2, padding='same')(x)
             x = UpSampling2D()(x)
             x = Conv2D(filters=int(self.ngf * mult / 2), kernel_size=(3, 3), padding='same')(x)
             x = BatchNormalization()(x)
@@ -168,7 +167,6 @@ class NeuralNetworkReds():
         x = Activation('tanh')(x)
 
         outputs = Add()([x, inputs])
-        # outputs = Lambda(lambda z: K.clip(z, -1, 1))(x)
         outputs = Lambda(lambda z: z/2)(outputs)
 
         model = Model(inputs=inputs, outputs=outputs, name='Generator')
@@ -210,13 +208,6 @@ class NeuralNetworkReds():
         generated_image = generator(inputs)
         outputs = discriminator(generated_image)
         model = Model(inputs=inputs, outputs=outputs)
-        return model
-
-    def _generator_containing_discriminator_multiple_outputs(self, generator, discriminator):
-        inputs = Input(shape=self.image_shape)
-        generated_image = generator(inputs)
-        outputs = discriminator(generated_image)
-        model = Model(inputs=inputs, outputs=[generated_image, outputs])
         return model
 
     def save(self, file_name):

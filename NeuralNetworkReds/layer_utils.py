@@ -69,7 +69,6 @@ def spatial_reflection_2d_padding(x, padding=((1, 1), (1, 1)), data_format=None)
     return tf.pad(x, pattern, "REFLECT")
 
 
-# TODO: Credits
 class ReflectionPadding2D(Layer):
     """Reflection-padding layer for 2D input (e.g. picture).
     This layer can add rows and columns or zeros

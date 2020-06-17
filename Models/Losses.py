@@ -80,7 +80,7 @@ def perceptual_loss(y_true, y_pred):
 def wasserstein_loss(y_true, y_pred):
     return K.mean(y_true*y_pred)
 
-
+"""
 def gradient_penalty_loss(self, y_true, y_pred, averaged_samples):
     gradients = K.gradients(y_pred, averaged_samples)[0]
     gradients_sqr = K.square(gradients)
@@ -91,7 +91,7 @@ def gradient_penalty_loss(self, y_true, y_pred, averaged_samples):
     gradient_penalty = K.square(1 - gradient_l2_norm)
 
     return K.mean(gradient_penalty)
-
+"""
 def printer(mse, ssim, psnr):
     print("********************\n")
     print("The MSE value is: {:.2f}".format(mse))

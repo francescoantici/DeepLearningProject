@@ -39,7 +39,7 @@ class NeuralNetworkCifar10():
         #The callback return the best set of Weights, given on the best value of the val_accuracy
         #After 3 non improving iteration it stops the training
         Xtrain, ytrain, Xval, yval, Xtest, ytest = arguments
-        es = EarlyStopping(monitor = 'val_loss', mode = min, restore_best_weights = True, verbose = 1, patience = 3000)
+        es = EarlyStopping(monitor = 'val_loss', mode = min, restore_best_weights = True, verbose = 1, patience = 30)
         return self._model.fit(Xtrain, ytrain, epochs = epochs, validation_data = (Xval, yval), callbacks = [es])
 
     def show_different_sigma(self, X, y, list_sigma):
